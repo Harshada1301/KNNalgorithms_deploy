@@ -13,132 +13,169 @@ if os.path.exists(MODEL_PATH):
 else:
     model = None
 
-# Custom dashboard tailored for the 11 heart disease dataset features
+# Premium aesthetic matched precisely to the provided reference UI
 HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Heart Disease Predictor (KNN)</title>
+    <title>Explore Health Insurance - KNN</title>
     <style>
-        :root {
-            --bg-color: #f8fafc;
-            --card-bg: #ffffff;
-            --primary-color: #4f46e5;
-            --primary-hover: #4338ca;
-            --text-main: #0f172a;
-            --text-muted: #475569;
-            --border-color: #cbd5e1;
-        }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
             margin: 0;
             padding: 40px 20px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #f3a39e 0%, #da6d81 50%, #688fa7 100%);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             box-sizing: border-box;
         }
-        .container {
-            background: var(--card-bg);
-            padding: 32px;
-            border-radius: 16px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        .wrapper {
+            position: relative;
             width: 100%;
-            max-width: 650px;
-            border: 1px solid #e2e8f0;
+            max-width: 600px;
+        }
+        .badge {
+            position: absolute;
+            top: -14px;
+            left: 20px;
+            background-color: #008753;
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 6px;
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .badge::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 10px;
+            border-width: 5px 5px 0 0;
+            border-style: solid;
+            border-color: #00643d transparent transparent transparent;
+        }
+        .container {
+            background: rgba(43, 41, 46, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 40px 32px 32px 32px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+            color: #ffffff;
+            box-sizing: border-box;
         }
         h2 {
-            margin-top: 0;
-            color: var(--text-main);
+            margin: 12px 0 6px 0;
             font-size: 26px;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 8px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
         }
         p.subtitle {
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 14px;
-            margin-bottom: 32px;
+            color: #d1d1d6;
+            font-size: 15px;
+            margin: 0 0 28px 0;
+            opacity: 0.9;
         }
         .grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 16px;
         }
-        @media (max-width: 500px) {
+        @media (max-width: 550px) {
             .grid { grid-template-columns: 1fr; }
+            .full-width { grid-column: span 1 !important; }
         }
         .form-group {
-            margin-bottom: 12px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 14px;
+            padding: 10px 16px;
+            box-sizing: border-box;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+        .form-group:focus-within {
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.1);
         }
         .full-width {
             grid-column: span 2;
         }
-        @media (max-width: 500px) {
-            .full-width { grid-column: span 1; }
-        }
         label {
             display: block;
-            margin-bottom: 6px;
-            font-weight: 500;
             font-size: 13px;
-            color: var(--text-muted);
+            color: #ffffff;
+            font-weight: 600;
+            margin-bottom: 2px;
         }
-        input[type="number"], select {
+        input[type="number"] {
             width: 100%;
-            padding: 10px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 14px;
-            box-sizing: border-box;
-            background-color: #fff;
-            transition: border-color 0.2s;
-        }
-        input[type="number"]:focus, select:focus {
+            background: transparent;
+            border: none;
             outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            color: #ffffff;
+            font-size: 15px;
+            padding: 4px 0;
+            box-sizing: border-box;
+        }
+        input[type="number"]::placeholder {
+            color: #a1a1aa;
+            opacity: 0.7;
+        }
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin-top: 20px;
+            font-size: 13px;
+            color: #e4e4e7;
+            cursor: pointer;
+        }
+        .checkbox-container input {
+            margin-right: 10px;
+            accent-color: #ffffff;
+            width: 16px;
+            height: 16px;
         }
         button {
             width: 100%;
-            background-color: var(--primary-color);
-            color: white;
-            padding: 14px;
+            background-color: #c2c3c9;
+            color: #1c1917;
+            padding: 15px;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: background-color 0.2s;
-            margin-top: 20px;
+            margin-top: 24px;
         }
         button:hover {
-            background-color: var(--primary-hover);
+            background-color: #ffffff;
         }
         .result-box {
-            margin-top: 28px;
+            margin-top: 24px;
             padding: 16px;
-            border-radius: 8px;
-            background-color: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            color: #166534;
+            border-radius: 12px;
+            background-color: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #4ade80;
             text-align: center;
             font-weight: 600;
-            font-size: 18px;
+            font-size: 17px;
         }
         .error-box {
-            margin-top: 28px;
+            margin-top: 24px;
             padding: 16px;
-            border-radius: 8px;
-            background-color: #fef2f2;
-            border: 1px solid #fecaca;
-            color: #991b1b;
+            border-radius: 12px;
+            background-color: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
             text-align: center;
             font-weight: 600;
         }
@@ -146,80 +183,89 @@ HTML_TEMPLATE = """
 </head>
 <body>
 
-<div class="container">
-    <h2>Heart Disease Predictor</h2>
-    <p class="subtitle">Provide patient clinical metrics to calculate KNN classification outcome.</p>
+<div class="wrapper">
+    <div class="badge">Buy Now with 0% GST</div>
     
-    {% if error_msg %}
-        <div class="error-box">{{ error_msg }}</div>
-    {% endif %}
+    <div class="container">
+        <h2>Explore Health Insurance</h2>
+        <p class="subtitle">Insure your Loved Ones in less than 5 mins!</p>
+        
+        {% if error_msg %}
+            <div class="error-box">{{ error_msg }}</div>
+        {% endif %}
 
-    <form action="/predict" method="POST">
-        <div class="grid">
-            <div class="form-group">
-                <label for="Age">Age</label>
-                <input type="number" name="Age" id="Age" required value="{{ inputs.get('Age', '') }}">
+        <form action="/predict" method="POST">
+            <div class="grid">
+                <div class="form-group">
+                    <label for="Age">Age</label>
+                    <input type="number" name="Age" id="Age" placeholder="Enter Age value" required value="{{ inputs.get('Age', '') }}">
+                </div>
+                
+                <div class="form-group">
+                    <label for="Sex">Sex</label>
+                    <input type="number" name="Sex" id="Sex" placeholder="Encoded numeric" required value="{{ inputs.get('Sex', '') }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="ChestPainType">Chest Pain Type</label>
+                    <input type="number" name="ChestPainType" id="ChestPainType" placeholder="Encoded status value" required value="{{ inputs.get('ChestPainType', '') }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="RestingBP">Resting Blood Pressure</label>
+                    <input type="number" name="RestingBP" id="RestingBP" placeholder="mm Hg" required value="{{ inputs.get('RestingBP', '') }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="Cholesterol">Cholesterol</label>
+                    <input type="number" name="Cholesterol" id="Cholesterol" placeholder="mm/dl" required value="{{ inputs.get('Cholesterol', '') }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="FastingBS">Fasting Blood Sugar</label>
+                    <input type="number" name="FastingBS" id="FastingBS" placeholder="Encoded check value" required value="{{ inputs.get('FastingBS', '') }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="RestingECG">Resting ECG Results</label>
+                    <input type="number" name="RestingECG" id="RestingECG" placeholder="Encoded numeric" required value="{{ inputs.get('RestingECG', '') }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="MaxHR">Max Heart Rate</label>
+                    <input type="number" name="MaxHR" id="MaxHR" placeholder="Max rate achieved" required value="{{ inputs.get('MaxHR', '') }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="ExerciseAngina">Exercise Induced Angina</label>
+                    <input type="number" name="ExerciseAngina" id="ExerciseAngina" placeholder="Encoded response" required value="{{ inputs.get('ExerciseAngina', '') }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="Oldpeak">Oldpeak</label>
+                    <input type="number" step="any" name="Oldpeak" id="Oldpeak" placeholder="ST depression value" required value="{{ inputs.get('Oldpeak', '') }}">
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="ST_Slope">ST Slope</label>
+                    <input type="number" name="ST_Slope" id="ST_Slope" placeholder="Encoded metric slope" required value="{{ inputs.get('ST_Slope', '') }}">
+                </div>
             </div>
             
-            <div class="form-group">
-                <label for="Sex">Sex (Encoded numeric)</label>
-                <input type="number" name="Sex" id="Sex" required value="{{ inputs.get('Sex', '') }}">
-            </div>
+            <label class="checkbox-container">
+                <input type="checkbox" required checked>
+                By proceeding, you agree to the Terms & Conditions
+            </label>
+            
+            <button type="submit">Get Quote</button>
+        </form>
 
-            <div class="form-group">
-                <label for="ChestPainType">Chest Pain Type (Encoded)</label>
-                <input type="number" name="ChestPainType" id="ChestPainType" required value="{{ inputs.get('ChestPainType', '') }}">
+        {% if prediction is not none %}
+            <div class="result-box">
+                Diagnostic Result Class Output: {{ prediction }}
             </div>
-
-            <div class="form-group">
-                <label for="RestingBP">Resting Blood Pressure (mm Hg)</label>
-                <input type="number" name="RestingBP" id="RestingBP" required value="{{ inputs.get('RestingBP', '') }}">
-            </div>
-
-            <div class="form-group">
-                <label for="Cholesterol">Serum Cholesterol (mm/dl)</label>
-                <input type="number" name="Cholesterol" id="Cholesterol" required value="{{ inputs.get('Cholesterol', '') }}">
-            </div>
-
-            <div class="form-group">
-                <label for="FastingBS">Fasting Blood Sugar (Encoded)</label>
-                <input type="number" name="FastingBS" id="FastingBS" required value="{{ inputs.get('FastingBS', '') }}">
-            </div>
-
-            <div class="form-group">
-                <label for="RestingECG">Resting ECG Results (Encoded)</label>
-                <input type="number" name="RestingECG" id="RestingECG" required value="{{ inputs.get('RestingECG', '') }}">
-            </div>
-
-            <div class="form-group">
-                <label for="MaxHR">Max Heart Rate Achieved</label>
-                <input type="number" name="MaxHR" id="MaxHR" required value="{{ inputs.get('MaxHR', '') }}">
-            </div>
-
-            <div class="form-group">
-                <label for="ExerciseAngina">Exercise Induced Angina (Encoded)</label>
-                <input type="number" name="ExerciseAngina" id="ExerciseAngina" required value="{{ inputs.get('ExerciseAngina', '') }}">
-            </div>
-
-            <div class="form-group">
-                <label for="Oldpeak">Oldpeak (ST Depression value)</label>
-                <input type="number" step="any" name="Oldpeak" id="Oldpeak" required value="{{ inputs.get('Oldpeak', '') }}">
-            </div>
-
-            <div class="form-group full-width">
-                <label for="ST_Slope">ST Slope (Encoded)</label>
-                <input type="number" name="ST_Slope" id="ST_Slope" required value="{{ inputs.get('ST_Slope', '') }}">
-            </div>
-        </div>
-        
-        <button type="submit">Run Diagnostics</button>
-    </form>
-
-    {% if prediction is not none %}
-        <div class="result-box">
-            Model Prediction Class Output: {{ prediction }}
-        </div>
-    {% endif %}
+        {% endif %}
+    </div>
 </div>
 
 </body>
@@ -238,36 +284,3 @@ def predict():
         return render_template_string(HTML_TEMPLATE, error_msg="Error: Model file is missing.", inputs={})
     
     try:
-        # Extract all 11 features precisely matching the structural requirements
-        features = [
-            float(request.form.get('Age', 0)),
-            float(request.form.get('Sex', 0)),
-            float(request.form.get('ChestPainType', 0)),
-            float(request.form.get('RestingBP', 0)),
-            float(request.form.get('Cholesterol', 0)),
-            float(request.form.get('FastingBS', 0)),
-            float(request.form.get('RestingECG', 0)),
-            float(request.form.get('MaxHR', 0)),
-            float(request.form.get('ExerciseAngina', 0)),
-            float(request.form.get('Oldpeak', 0)),
-            float(request.form.get('ST_Slope', 0))
-        ]
-        
-        input_data = np.array([features])
-        prediction = model.predict(input_data)[0]
-        
-        return render_template_string(
-            HTML_TEMPLATE, 
-            prediction=prediction, 
-            inputs=request.form
-        )
-    except Exception as e:
-        return render_template_string(
-            HTML_TEMPLATE, 
-            error_msg=f"Prediction failed: {str(e)}", 
-            inputs=request.form
-        )
-
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
